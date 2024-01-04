@@ -48,11 +48,36 @@ def second_half(hands_first_half, remaining_deck, num_players, num_additional_ca
 # Sample function for the complete game
 def play_game():
     deck = create_deck()
-    print('Team A players: Player 1 and 3')
-    print('Team B players: Player 2 and 4')
+
+    # Determine which team will distribute the cards
+    distributing_team = input("Which team will shuffle and distribute the cards? Enter 'A' for Team A or 'B' for Team B: ")
+
+    if distributing_team.upper() == 'A':
+        distributing_team_name = 'Team A'
+        receiving_team_name = 'Team B'
+        distributing_players = [1, 3]
+        receiving_players = [2, 4]
+    elif distributing_team.upper() == 'B':
+        distributing_team_name = 'Team B'
+        receiving_team_name = 'Team A'
+        distributing_players = [2, 4]
+        receiving_players = [1, 3]
+    else:
+        print("Invalid input. Defaulting to Team A.")
+        distributing_team_name = 'Team A'
+        receiving_team_name = 'Team B'
+        distributing_players = [1, 3]
+        receiving_players = [2, 4]
+
+    print(f"{distributing_team_name} players: Player {distributing_players[0]} and {distributing_players[1]}")
 
     num_players = 4
-    print('\nTeam A distributes the cards for the first half')
+    print(f'\n{distributing_team_name} chooses who will shuffle and distribute the cards: {distributing_players[0]} or {distributing_players[1]}')
+
+    distributing_player = int(input("Enter the player number who will shuffle and distribute the cards: "))
+    if distributing_player not in distributing_players:
+        print("Invalid input. Defaulting to the first player.")
+        distributing_player = distributing_players[0]
 
     hands_first_half, remaining_deck = shuffle_and_distribute(deck, num_players, 4)
 
@@ -64,11 +89,17 @@ def play_game():
     used_cards = set(card for hand in hands_first_half for card in hand)
     remaining_deck = [card for card in remaining_deck if card not in used_cards]
 
-    hukum_suit = input("\nTeam B, choose Hukum ['Clubs', 'Diamonds', 'Spades', 'Hearts']: ")
-    print(f"Team B selects '{hukum_suit}' as Hukum.")
+    # Determine the player who will choose Hukum
+    choosing_player = (distributing_player % num_players) + 1
 
-    print("\nTeam B distributes additional cards in the Second half:")
+    print(f"\n{receiving_team_name},  player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
+    hukum_suit = input("Enter the chosen Hukum  ")
+
+    print(f"{receiving_team_name} selects '{hukum_suit}' as Hukum.")
+
+    print(f"\n{distributing_team_name} Distributes additional cards in the Second half:")
     second_half(hands_first_half, remaining_deck, num_players, 4)
 
 # Run the complete game
 play_game()
+
