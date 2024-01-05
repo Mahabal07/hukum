@@ -94,8 +94,15 @@ def play_game():
 
     print(f"\n{receiving_team_name},  player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
     hukum_suit = input("Enter the chosen Hukum  ")
+    # Check if the entered Hukum is a valid suit
+    while hukum_suit.capitalize() not in suits:
+        print("Invalid suit. Please choose from 'Clubs', 'Diamonds', 'Spades', 'Hearts'")
+        break
+    hukum_suit = input("Enter the chosen Hukum: ")
+    
 
-    print(f"{receiving_team_name} selects '{hukum_suit}' as Hukum.")
+    print(f"{receiving_team_name} selects '{hukum_suit.capitalize()}' as Hukum.")
+    
 
     print(f"\n{distributing_team_name} Distributes additional cards in the Second half:")
     second_half(hands_first_half, remaining_deck, num_players, 4)
