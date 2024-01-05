@@ -1,4 +1,5 @@
 import random
+import pandas
 
 # Define suits and values
 suits = ['Clubs', 'Diamonds', 'Spades', 'Hearts']
