@@ -103,3 +103,67 @@ def play_game():
 # Run the complete game
 play_game()
 
+
+import random
+
+# ... (include your existing functions here)
+
+# Function to determine the winner of a trick
+def get_trick_winner(cards_played, hukum_suit):
+    # Sort cards based on value, considering Hukum suit
+    sorted_cards = sorted(cards_played, key=lambda card: (card[1] != hukum_suit, values.index(card[1])))
+
+    # The last card in the sorted list is the winner
+    return sorted_cards[-1]
+
+# Function to play one round of the game
+def play_round(hands, hukum_suit):
+    cards_played = []
+
+    # Players play one card each
+    for i in range(len(hands[0])):
+        for j in range(len(hands)):
+            card_played = hands[j].pop(0)
+            cards_played.append(card_played)
+            print(f"Player {j + 1} plays: {card_played}")
+
+    # Player who said "Hukum" gets the last chance
+    hukum_player = int(input("Player who said 'Hukum,' enter your player number: ")) - 1
+    hukum_card_played = hands[hukum_player].pop(0)
+    cards_played.append(hukum_card_played)
+    print(f"Player {hukum_player + 1} (Hukum) plays: {hukum_card_played}")
+
+    # Determine the winner of the trick
+    winner = get_trick_winner(cards_played, hukum_suit)
+    print(f"\nPlayer {winner[0]} wins the trick!\n")
+    return winner[0] % 2  # Return the winning team (0 or 1)
+
+# Function to play the entire game
+def play_game():
+    # ... (include your existing code here)
+
+    # Initialize scores and hands
+    scores = [0, 0]
+    hands, remaining_deck = shuffle_and_distribute(create_deck(), 4, 8)
+
+    # Determine the Hukum suit
+    hukum_suit = input("Enter the chosen Hukum suit from ['Clubs', 'Diamonds', 'Spades', 'Hearts']: ")
+
+    # Play 8 rounds
+    for round_num in range(1, 9):
+        print(f"\n------ Round {round_num} ------")
+        winning_team = play_round(hands, hukum_suit)
+        scores[winning_team] += 1
+        print(f"Scores: Team A = {scores[0]}, Team B = {scores[1]}\n")
+
+        # Remove played cards from hands
+        for hand in hands:
+            hand.pop(0)  # Remove the first card in each player's hand
+
+    # Determine the match winner
+    match_winner = "Team A" if scores[0] >= 4 else "Team B"
+    print(f"\n{match_winner} wins the match!")
+
+# Run the complete game
+play_game()
+
