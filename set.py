@@ -1,4 +1,3 @@
-
 import random
 
 # Define suits and values
@@ -46,7 +45,41 @@ def second_half(hands_first_half, remaining_deck, num_players, num_additional_ca
     for i, hand in enumerate(hands_first_half):
         print(f'Player {i + 1} Hand: {hand}')
 
-# Sample function for the complete game
+# Function to determine the winner of a trick
+def get_trick_winner(cards_played, hukum_suit):
+    # Sort cards based on value, considering Hukum suit
+    sorted_cards = sorted(cards_played, key=lambda card: (card[1] != hukum_suit, values.index(card[1])))
+
+    # The last card in the sorted list is the winner
+    return sorted_cards[-1]
+
+# Function to play one round of the game
+def play_round(hands, hukum_suit):
+    cards_played = []
+
+    # Player chooses and throws one card
+    for i in range(len(hands)):
+        print(f"\nPlayer {i + 1}, choose one card to throw:")
+        print(f"Your current hand: {hands[i]}")
+
+        # Player selects a card to throw
+        thrown_card_index = int(input("Enter the index (1 to 8) of the card to throw: ")) - 1
+        thrown_card = hands[i].pop(thrown_card_index)
+        print(f"Player {i + 1} throws: {thrown_card}")
+        cards_played.append(thrown_card)
+
+    # Player who said "Hukum" gets the last chance
+    hukum_player = int(input("Player who said 'Hukum,' enter your player number: ")) - 1
+    hukum_card_played = hands[hukum_player].pop(0)
+    cards_played.append(hukum_card_played)
+    print(f"Player {hukum_player + 1} (Hukum) plays: {hukum_card_played}")
+
+    # Determine the winner of the trick
+    winner = get_trick_winner(cards_played, hukum_suit)
+    print(f"\nPlayer {winner[0]} wins the trick!\n")
+    return winner[0] % 2  # Return the winning team (0 or 1)
+
+# Function to play the entire game
 def play_game():
     deck = create_deck()
 
@@ -94,21 +127,29 @@ def play_game():
     choosing_player = (distributing_player % num_players) + 1
 
     print(f"\n{receiving_team_name},  player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
-    hukum_suit = input("Enter the chosen Hukum  ")
-    # Check if the entered Hukum is a valid suit
-    while hukum_suit.capitalize() not in suits:
-        print("Invalid suit. Please choose from 'Clubs', 'Diamonds', 'Spades', 'Hearts'")
-        break
     hukum_suit = input("Enter the chosen Hukum: ")
-    
 
-    print(f"{receiving_team_name} selects '{hukum_suit.capitalize()}' as Hukum.")
-    
+    print(f"{receiving_team_name} selects '{hukum_suit}' as Hukum.")
 
-    print(f"\n{distributing_team_name} Distributes additional cards in the Second half:")
-    second_half(hands_first_half, remaining_deck, num_players, 4)
+    # Play 8 rounds
+    for round_num in range(1, 9):
+        print(f"\n------ Round {round_num} ------")
+
+        # Determine the starting suit for this round
+        starting_suit = input(f"Player {distributing_player}, choose the starting suit for this round from {suits}: ")
+        print(f"\nStarting suit for this round: {starting_suit}\n")
+
+        winning_team = play_round(hands_first_half, starting_suit)
+        print(f"Scores: Team A = {winning_team + 1}, Team B = {3 - winning_team}\n")
+
+        # Remove played cards from hands
+        for hand in hands_first_half:
+            hand.pop(0)  # Remove the first card in each player's hand
+
+    # Determine the match winner
+    match_winner = "Team A" if winning_team + 1 >= 4 else "Team B"
+    print(f"\n{match_winner} wins the match!")
 
 # Run the complete game
 play_game()
-
 
