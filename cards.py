@@ -1,4 +1,3 @@
-
 import random
 
 # Define suits and values
@@ -23,30 +22,19 @@ def shuffle_and_distribute(deck, num_players, num_cards):
 
     return hands, deck[current_card:]
 
-# Function for the second half of the game
-def second_half(hands_first_half, remaining_deck, num_players, num_additional_cards):
-    shuffled_remaining_deck = remaining_deck[:]  # Create a copy to shuffle independently
-    random.shuffle(shuffled_remaining_deck)
+# Function for a player's turn to choose a card
+def choose_card(player_number, player_hand):
+    print(f"\nPlayer {player_number}'s Hand: {player_hand}")
+    chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
-    # Use a set to keep track of distributed cards
-    distributed_cards = set()
+    # Check if the chosen index is valid
+    while chosen_card_index < 0 or chosen_card_index >= len(player_hand):
+        print("Invalid index. Please choose a valid index.")
+        chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
-    for i in range(num_additional_cards):
-        for j in range(num_players):
-            # Ensure that the card is not repeated within the player's hand
-            while shuffled_remaining_deck and shuffled_remaining_deck[i] in distributed_cards:
-                i = (i + 1) % len(shuffled_remaining_deck)
+    return player_hand.pop(chosen_card_index)
 
-            if shuffled_remaining_deck:
-                hands_first_half[j].append(shuffled_remaining_deck[i])
-                distributed_cards.add(shuffled_remaining_deck[i])
-                i += 1
-
-    print("\nHands at the end of the Second half:")
-    for i, hand in enumerate(hands_first_half):
-        print(f'Player {i + 1} Hand: {hand}')
-
-# Sample function for the complete game
+# Function for the main game loop
 def play_game():
     deck = create_deck()
 
@@ -77,7 +65,8 @@ def play_game():
 
     distributing_player = int(input("Enter the player number who will shuffle and distribute the cards: "))
     if distributing_player not in distributing_players:
-        print("Invalid input. Defaulting to the first player.")
+        print("Invalid input!!!!. PLEASE ENTER YOUR CORRECT PLAYER NUMBER.")
+        exit()
         distributing_player = distributing_players[0]
 
     hands_first_half, remaining_deck = shuffle_and_distribute(deck, num_players, 4)
@@ -92,23 +81,72 @@ def play_game():
 
     # Determine the player who will choose Hukum
     choosing_player = (distributing_player % num_players) + 1
-
-    print(f"\n{receiving_team_name},  player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
+    print(f"\n{receiving_team_name}, player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
     hukum_suit = input("Enter the chosen Hukum  ")
+
     # Check if the entered Hukum is a valid suit
     while hukum_suit.capitalize() not in suits:
         print("Invalid suit. Please choose from 'Clubs', 'Diamonds', 'Spades', 'Hearts'")
         break
-    hukum_suit = input("Enter the chosen Hukum: ")
-    
 
     print(f"{receiving_team_name} selects '{hukum_suit.capitalize()}' as Hukum.")
-    
 
     print(f"\n{distributing_team_name} Distributes additional cards in the Second half:")
-    second_half(hands_first_half, remaining_deck, num_players, 4)
+    
+    # Second half of the game
+    shuffled_remaining_deck = remaining_deck[:]  # Create a copy to shuffle independently
+    random.shuffle(shuffled_remaining_deck)
 
-# Run the complete game
+    # Use a set to keep track of distributed cards
+    distributed_cards = set()
+
+    for i in range(4):
+        for j in range(num_players):
+            # Ensure that the card is not repeated within the player's hand
+            while shuffled_remaining_deck and shuffled_remaining_deck[i] in distributed_cards:
+                i = (i + 1) % len(shuffled_remaining_deck)
+
+            if shuffled_remaining_deck:
+                hands_first_half[j].append(shuffled_remaining_deck[i])
+                distributed_cards.add(shuffled_remaining_deck[i])
+                i += 1
+
+    print("\nHands at the end of the Second half:")
+    for i, hand in enumerate(hands_first_half):
+        print(f'Player {i + 1} Hand: {hand}')
+
+    # Determine the player who starts the game after the second half based on the shuffling player in the first half
+    if distributing_team_name == 'Team A':
+        shuffling_player_first_half = 1 if distributing_player == 1 else 3
+    else:  # distributing_team_name == 'Team B'
+        shuffling_player_first_half = 2 if distributing_player == 2 else 4
+
+    # Determine which player starts the game after the second half based on the shuffling player in the first half
+    if shuffling_player_first_half == 1:
+        starting_player = 3
+    elif shuffling_player_first_half == 2:
+        starting_player = 4
+    elif shuffling_player_first_half == 4:
+        starting_player = 2
+    else:
+        starting_player = 1
+
+    # Card choosing and showing phase
+    print(f"\n{receiving_team_name}, player {starting_player} starts the card choosing phase.")
+    current_player = starting_player
+
+    # Card choosing and showing phase for each player
+    for _ in range(4):
+        chosen_card = choose_card(current_player, hands_first_half[current_player - 1])
+        print(f"Player {current_player} shows: {chosen_card}")
+
+        # Update the starting suit for the next player
+        starting_suit = chosen_card[0]
+
+        # Move to the next player
+        current_player = (current_player % num_players) + 1
+
+    print("\nAll players have shown their cards.")
+
+# Start the game
 play_game()
-
-
