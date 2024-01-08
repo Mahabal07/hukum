@@ -128,6 +128,8 @@ def play_game():
         starting_player = 4
     elif shuffling_player_first_half == 4:
         starting_player = 2
+
+
     else:
         starting_player = 1
 
@@ -136,9 +138,11 @@ def play_game():
     current_player = starting_player
 
     # Card choosing and showing phase for each player
-    for _ in range(4):
+    for _ in range(8):
         chosen_card = choose_card(current_player, hands_first_half[current_player - 1])
-        print(f"Player {current_player} shows: {chosen_card}")
+        print(f"Player {current_player} shows: {chosen_card}")  
+        # hands_first_half = hands_first_half-chosen_card
+        print(hands_first_half[current_player-1])
 
         # Update the starting suit for the next player
         starting_suit = chosen_card[0]

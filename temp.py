@@ -22,71 +22,19 @@ def shuffle_and_distribute(deck, num_players, num_cards):
 
     return hands, deck[current_card:]
 
-# Function to compare cards based on Hukum
-def compare_cards(card1, card2, hukum):
-    if card1[0] == card2[0]:
-        return values.index(card1[1]) - values.index(card2[1])
-    elif card1[0] == hukum:
-        return 1
-    elif card2[0] == hukum:
-        return -1
-    else:
-        return 0
+# Function for a player's turn to choose a card
+def choose_card(player_number, player_hand):
+    print(f"\nPlayer {player_number}'s Hand: {player_hand}")
+    chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
-# Function to play a round
-def play_round(player_hands, hukum):
-    round_cards = []
+    # Check if the chosen index is valid
+    while chosen_card_index < 0 or chosen_card_index >= len(player_hand):
+        print("Invalid index. Please choose a valid index.")
+        chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
-    for i in range(4):
-        current_player = i % 2
-        print(f"Player {current_player + 1}'s turn:")
-        card_played = input(f"Select a card to play from {player_hands[current_player]}: ")
+    return player_hand.pop(chosen_card_index)
 
-        # Check if the card is valid
-        if (card_played, card_played[0]) not in player_hands[current_player]:
-            print("Invalid card. Try again.")
-            i -= 1
-            continue
-
-        player_hands[current_player].remove((card_played, card_played[0]))
-
-        if i > 0:
-            # Check if the card follows the suit constraint
-            if (card_played[0] != round_cards[0][0]) and any(card[0] == round_cards[0][0] for card in player_hands[current_player]):
-                print("Invalid move. Follow the suit.")
-                i -= 1
-                continue
-
-        print(f"Player {current_player + 1} played: {card_played}")
-        round_cards.append((card_played, card_played[0]))
-
-    round_winner = max(round_cards, key=lambda x: (values.index(x[1]), x[0]), default=None)
-    print(f"Round winner: Player {round_cards.index(round_winner) + 1}")
-    return round_winner
-
-# ... (Your existing code)
-
-# Function to play the second half
-def play_second_half(hands_first_half, remaining_deck, num_players, num_sets, hukum_suit):
-    shuffled_remaining_deck = remaining_deck[:]
-    random.shuffle(shuffled_remaining_deck)
-
-    # Distribute additional cards to the other team
-    hands_second_half, remaining_deck = shuffle_and_distribute(shuffled_remaining_deck, num_players, 4)
-
-    print("\nHands at the end of the Second half:")
-    for i, hand in enumerate(hands_second_half):
-        print(f'Player {i + 1} Hand: {hand}')
-
-    # Play sets in the second half
-    for _ in range(num_sets):
-        round_winner = play_round(hands_second_half, hukum_suit)
-        starting_player = hands_second_half.index(round_winner) % 2
-        hands_second_half = hands_second_half[starting_player:] + hands_second_half[:starting_player]
-
-    print("Game over.")
-
-# Function to play the complete game
+# Function for the main game loop
 def play_game():
     deck = create_deck()
 
@@ -117,7 +65,8 @@ def play_game():
 
     distributing_player = int(input("Enter the player number who will shuffle and distribute the cards: "))
     if distributing_player not in distributing_players:
-        print("Invalid input. Defaulting to the first player.")
+        print("Invalid input!!!!. PLEASE ENTER YOUR CORRECT PLAYER NUMBER.")
+        exit()
         distributing_player = distributing_players[0]
 
     hands_first_half, remaining_deck = shuffle_and_distribute(deck, num_players, 4)
@@ -128,25 +77,86 @@ def play_game():
 
     # Extract cards used in the first half from the remaining deck
     used_cards = set(card for hand in hands_first_half for card in hand)
-    remaining_deck = [(card, card[0]) for card in remaining_deck if (card, card[0]) not in used_cards]
+    remaining_deck = [card for card in remaining_deck if card not in used_cards]
 
     # Determine the player who will choose Hukum
     choosing_player = (distributing_player % num_players) + 1
+    print(f"\n{receiving_team_name}, player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
+    hukum_suit = input("Enter the chosen Hukum  ")
 
-    print(f"\n{receiving_team_name}, player {choosing_player} choose hukum from this suit ['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
-    
-    # Choose Hukum
-    hukum_suit = input("Enter the chosen Hukum: ").capitalize()
-
-    while hukum_suit not in suits:
+    # Check if the entered Hukum is a valid suit
+    while hukum_suit.capitalize() not in suits:
         print("Invalid suit. Please choose from 'Clubs', 'Diamonds', 'Spades', 'Hearts'")
-        hukum_suit = input("Enter the chosen Hukum: ").capitalize()
+        break
 
-    print(f"{receiving_team_name} selects '{hukum_suit}' as Hukum.")
+    print(f"{receiving_team_name} selects '{hukum_suit.capitalize()}' as Hukum.")
 
     print(f"\n{distributing_team_name} Distributes additional cards in the Second half:")
-    play_second_half(hands_first_half, remaining_deck, num_players, 8 - len(hands_first_half[0]), hukum_suit)
+    
+    # Second half of the game
+    shuffled_remaining_deck = remaining_deck[:]  # Create a copy to shuffle independently
+    random.shuffle(shuffled_remaining_deck)
 
-# Run the complete game
+    # Use a set to keep track of distributed cards
+    distributed_cards = set()
+
+    for i in range(4):
+        for j in range(num_players):
+            # Ensure that the card is not repeated within the player's hand
+            while shuffled_remaining_deck and shuffled_remaining_deck[i] in distributed_cards:
+                i = (i + 1) % len(shuffled_remaining_deck)
+
+            if shuffled_remaining_deck:
+                hands_first_half[j].append(shuffled_remaining_deck[i])
+                distributed_cards.add(shuffled_remaining_deck[i])
+                i += 1
+
+    print("\nHands at the end of the Second half:")
+    for i, hand in enumerate(hands_first_half):
+        print(f'Player {i + 1} Hand: {hand}')
+
+    # Determine the player who starts the game after the second half based on the shuffling player in the first half
+    if distributing_team_name == 'Team A':
+        shuffling_player_first_half = 1 if distributing_player == 1 else 3
+    else:  # distributing_team_name == 'Team B'
+        shuffling_player_first_half = 2 if distributing_player == 2 else 4
+
+    # Determine which player starts the game after the second half based on the shuffling player in the first half
+    if shuffling_player_first_half == 1:
+        starting_player = 3
+    elif shuffling_player_first_half == 2:
+        starting_player = 4
+    elif shuffling_player_first_half == 4:
+        starting_player = 2
+    else:
+        starting_player = 1
+
+    def choose_card(player_number, player_hand):
+        print(f"\nPlayer {player_number}'s Hand: {player_hand}")
+        chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
+
+        while chosen_card_index < 0 or chosen_card_index >= len(player_hand):
+            print("Invalid index. Please choose a valid index.")
+            chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
+
+        return player_hand.pop(chosen_card_index)
+
+def play_game():
+    deck = create_deck()
+    hands_first_half, remaining_deck = shuffle_and_distribute(deck, num_players=4, num_cards=4)
+
+    print("\nShuffled Hands at the end of the First half:")
+    for i, hand in enumerate(hands_first_half):
+        print(f'Player {i + 1} Hand: {hand}')
+
+    # Eliminate chosen cards after every 4 cards
+    for round_number in range(1, 3):  # Assuming 2 rounds for illustration
+        print(f"\nRound {round_number}: Chosen cards are eliminated.")
+        for i in range(len(hands_first_half)):
+            chosen_card = choose_card(i + 1, hands_first_half[i])
+            print(f"Player {i + 1} shows: {chosen_card}")
+
+    # ... (rest of the code remains unchanged)
+
+# Start the game
 play_game()
-
