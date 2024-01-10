@@ -35,9 +35,11 @@ def choose_card(player_number, player_hand):
     return player_hand.pop(chosen_card_index)
 
 # Function for the main game loop
-def play_round(hands, current_round, starting_player):
+def play_round(hands, current_round, starting_player, eliminated_cards):
     print(f"\nRound {current_round} - Card choosing and showing phase:")
     current_player = starting_player
+
+    chosen_cards_round = []  # List to store chosen cards in the current round
 
     # Card choosing and showing phase for each player in the round
     for _ in range(4):
@@ -45,11 +47,19 @@ def play_round(hands, current_round, starting_player):
         print(f"Player {current_player} shows: {chosen_card}")
         print(hands[current_player - 1])
 
+        chosen_cards_round.append(chosen_card)
+
         # Update the starting suit for the next player
         starting_suit = chosen_card[0]
 
         # Move to the next player
         current_player = (current_player % 4) + 1
+
+    # Print chosen cards for the current round
+    print(f"\nChosen cards for Round {current_round}: {chosen_cards_round}")
+
+    # Add the chosen cards to the eliminated cards set
+    eliminated_cards[current_round - 1].update(set(chosen_card for chosen_card in chosen_cards_round))
 
 # Function for the main game loop
 def play_game():
@@ -147,11 +157,19 @@ def play_game():
     else:
         starting_player_second_half = 2  # Default to Player 2 if none of the above conditions are met
 
-    # Play 8 rounds
-    for round_num in range(1, 9):
-        play_round(hands_first_half, round_num, starting_player_second_half)
+    # Play 8 sets (rounds)
+    for set_num in range(1, 9):
+        eliminated_cards = [set() for _ in range(8)]  # Initialize eliminated cards for each set
 
-    print("\nAll players have shown their cards.")
+        # Play 8 rounds within the set
+        for round_num in range(1, 9):
+            play_round(hands_first_half, round_num, starting_player_second_half, eliminated_cards)
+
+        print(f"\nSet {set_num} completed. Eliminated cards in each round:")
+        for i, eliminated_set in enumerate(eliminated_cards):
+            print(f"Round {i + 1}: {eliminated_set}")
+
+    print("\nAll sets have been completed. All players have shown their cards.")
 
 # Start the game
 play_game()
