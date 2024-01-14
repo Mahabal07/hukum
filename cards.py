@@ -4,6 +4,7 @@ import random
 suits = ['Clubs', 'Diamonds', 'Spades', 'Hearts']
 values = ['7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
+
 # Function to create a deck of cards without repetition
 def create_deck():
     return [(suit, value) for suit in suits for value in values]
@@ -36,17 +37,30 @@ def choose_card(player_number, player_hand):
 
 # Function to determine the winning card based on priority
 def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
+    values = ['7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+
+    
     def card_priority(card):
         suit, value = card
         if suit == hukum_suit:
             return values.index(value)  # Priority based on the value index for Hukum suit
         elif suit == starting_suit:
             return values.index(value)  # Priority based on the value index for starting suit
-        else:
-            return float('-inf')  # Negative infinity to prioritize non-matching suits last
+        
+
+    # Find the winning card based on priority
+    hukum_suit_cards = [card for card in chosen_cards if card[0] == hukum_suit]
+    if hukum_suit_cards:
+        winning_card = max(hukum_suit_cards, key=card_priority)
+    else:
+        starting_suit_cards = [card for card in chosen_cards if card[0] == starting_suit]
+        winning_card = max(starting_suit_cards, key=card_priority, default=None)
+
+    return winning_card
+
 
     # Sort the chosen cards based on priority
-    chosen_cards.sort(key=lambda card: card_priority(card), reverse=True)
+    chosen_cards.sort(key=lambda card: card_priority(card),reverse=True)
 
     # Return the winning card (the first card after sorting)
     return chosen_cards[0]
@@ -78,7 +92,7 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
 
     # Find the player who played the winning card
     value_index = chosen_cards_round.index(winning_card)
-    winner_player = (starting_player + value_index - 1 ) % 4 + 1
+    winner_player = (starting_player + value_index  ) % 4 +1
 
     print(f"\nPlayer {winner_player} wins Round {current_round} with the card: {winning_card}")
 
