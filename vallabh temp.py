@@ -44,13 +44,15 @@ def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
             return values.index(value)  # Priority based on the value index for starting suit
         else:
             return float('-inf')  # Negative infinity to prioritize non-matching suits last
+    print(chosen_cards)
+    print(hukum_suit)
+    print(starting_suit)
 
     # Sort the chosen cards based on priority
     chosen_cards.sort(key=lambda card: card_priority(card), reverse=True)
 
     # Return the winning card (the first card after sorting)
     return chosen_cards[0]
-
 
 # Function for the main game loop
 def play_round(hands, current_round, starting_player, eliminated_cards, hukum_suit):
@@ -96,7 +98,6 @@ def play_game():
 
     # Determine which team will distribute the cards
     distributing_team = input("Which team will shuffle and distribute the cards? Enter 'A' for Team A or 'B' for Team B: ")
-
     if distributing_team.upper() == 'A':
         distributing_team_name = 'Team A'
         receiving_team_name = 'Team B'
@@ -178,8 +179,7 @@ def play_game():
         print("\nHands at the end of the Second half:")
         for i, hand in enumerate(hands_first_half):
             print(f'Player {i + 1} Hand: {hand}')
-
-        # Determine the player who starts the game after the second half based on the shuffling player in the first half
+# Determine the player who starts the game after the second half based on the shuffling player in the first half
         if distributing_team_name == 'Team A' and distributing_player == 1:
             starting_player_second_half = 3  # Player 1 starts if Player 1 shuffled in the first half
         elif distributing_team_name == 'Team A' and distributing_player == 3:
