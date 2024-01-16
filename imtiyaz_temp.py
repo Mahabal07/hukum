@@ -42,9 +42,10 @@ def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
     # Function to calculate priority based on the specified conditions
     def calculate_priority(card):
       suit, value = card
+      print(starting_suit)
       if suit.lower() == hukum_suit:
         return 16 + card_priority[value]  # Priority for Hukum suit
-      elif suit.lower() == starting_suit:
+      elif suit.lower() == starting_suit.lower():
         return 8 + card_priority[value]  # Priority for starting suit
       else:
         return card_priority[value]  # Priority for other suits
