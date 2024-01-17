@@ -99,9 +99,31 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
 
     return starting_suit_next_round
 
+
+# Function to check if the game has ended
+def is_game_over(deck):
+    if not deck:
+        print("\nThe deck is empty. All players have shown their cards. Game Over!")
+        return True
+    return False
+
+# Function to determine the winner of the match
+def determine_match_winner(team_a_sets_won, team_b_sets_won):
+    # print("functio has benn called")
+    print(f"team a points {team_a_sets_won}")
+    print(f"team b points {team_b_sets_won}")
+    if team_a_sets_won == 5:
+        print("\nTeam A wins the match!")
+    elif team_b_sets_won == 4:
+        print("\nTeam B wins the match!")
+    else:
+        print("\nThe match ends in a tie!")
+
 # Function for the main game loop
 def play_game():
     deck = create_deck()
+    num_players = 4
+
 
     # Determine which team will distribute the cards
     distributing_team = input("Which team will shuffle and distribute the cards? Enter 'A' for Team A or 'B' for Team B: ")
@@ -170,6 +192,9 @@ def play_game():
     # Initialize starting suit for the first round
     starting_suit_second_half = None
 
+    team_a_sets_won = 0
+    team_b_sets_won = 0   
+
     for _ in range(rounds):
         for j in range(num_players):
             # Distribute cards for the current round
@@ -197,6 +222,7 @@ def play_game():
             starting_player_second_half = 2  # Default to Player 2 if none of the above conditions are met
 
         # Play 8 sets (rounds)
+        # Play 8 sets (rounds)
         for set_num in range(1, 9):
             eliminated_cards = [set() for _ in range(8)]  # Initialize eliminated cards for each set
 
@@ -204,18 +230,30 @@ def play_game():
             for round_num in range(1, 9):
                 # Pass the starting player for the current round
                 starting_suit_second_half = play_round(hands_first_half, round_num, starting_player_second_half, eliminated_cards, hukum_suit)
-                
+
                 # Determine the winning player of the last round in the set
                 winning_player_last_round = (starting_player_second_half % 4) + 1
-                
+
                 # Update starting player for the next round based on the winner of the current round
                 starting_player_second_half = winning_player_last_round
+                # Determine the winner of the set
+                if winning_player_last_round in [1, 3]:  # Team A wins the set
+                    team_a_sets_won += 1
+                else:  # Team B wins the set
+                    team_b_sets_won += 1
 
             print(f"\nSet {set_num} completed. Eliminated cards in each round:")
             for i, eliminated_set in enumerate(eliminated_cards):
                 print(f"Round {i + 1}: {eliminated_set}")
 
-        print("\nAll sets have been completed. All players have shown their cards.")
+            # Check if the deck is empty after each set
+            if is_game_over(shuffled_remaining_deck):
+                    # Declare the overall winner of the match
+                break
+        if is_game_over(shuffled_remaining_deck):
+            determine_match_winner(team_a_sets_won, team_b_sets_won)
+            break
+
 
 # Start the game
 play_game()
