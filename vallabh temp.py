@@ -42,7 +42,7 @@ def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
     # Function to calculate priority based on the specified conditions
     def calculate_priority(card):
       suit, value = card
-      print(starting_suit)
+    #   print(starting_suit)
       if suit.lower() == hukum_suit:
         return 16 + card_priority[value]  # Priority for Hukum suit
       elif suit.lower() == starting_suit.lower():
@@ -146,7 +146,7 @@ def play_game():
     # Determine the player who will choose Hukum
     choosing_player = (distributing_player % num_players) + 1
     print(f"\n{receiving_team_name}, player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
-    hukum_suit = input("Enter the chosen Hukum  ")
+    hukum_suit = input("Enter the chosen Hukum  ").lower()
 
     # Check if the entered Hukum is a valid suit
     while hukum_suit.capitalize() not in suits:
