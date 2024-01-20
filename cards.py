@@ -87,7 +87,11 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
 
     # Find the player who played the winning card
     winner_index = chosen_cards_round.index(winning_card)
-    winner_player = (starting_player + winner_index-1 ) % 4 + 1
+
+    winner_player = (starting_player -winner_index) % 4 + 1
+
+
+
 
     print(f"\nPlayer {winner_player} wins Round {current_round} with the card: {winning_card}")
 
