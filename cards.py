@@ -24,6 +24,7 @@ def shuffle_and_distribute(deck, num_players, num_cards):
 
 # Function for a player's turn to choose a card
 def choose_card(player_number, player_hand):
+
     print(f"\nPlayer {player_number}'s Hand: {player_hand}")
     chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
@@ -57,10 +58,6 @@ def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
     # Return the winning card (the first card after sorting)
     return chosen_cards[0]
 
-# Rest of your code...
-
-
-
 # Function for the main game loop
 def play_round(hands, current_round, starting_player, eliminated_cards, hukum_suit):
     print(f"\nRound {current_round} - Card choosing and showing phase:")
@@ -89,9 +86,6 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
     winner_index = chosen_cards_round.index(winning_card)
 
     winner_player = (starting_player -winner_index) % 4 + 1
-
-
-
 
     print(f"\nPlayer {winner_player} wins Round {current_round} with the card: {winning_card}")
 
