@@ -4,7 +4,6 @@ import random
 suits = ['Clubs', 'Diamonds', 'Spades', 'Hearts']
 values = ['7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
-
 # Function to create a deck of cards without repetition
 def create_deck():
     return [(suit, value) for suit in suits for value in values]
@@ -25,6 +24,7 @@ def shuffle_and_distribute(deck, num_players, num_cards):
 
 # Function for a player's turn to choose a card
 def choose_card(player_number, player_hand):
+
     print(f"\nPlayer {player_number}'s Hand: {player_hand}")
     chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
@@ -37,34 +37,26 @@ def choose_card(player_number, player_hand):
 
 # Function to determine the winning card based on priority
 def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
-    values = ['7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+    # Priority dictionary for non-Hukum suits
+    card_priority = {'7': 0, '8': 1, '9': 2, '10': 3, 'Jack': 4, 'Queen': 5, 'King': 6, 'Ace': 7}
 
-    
-    def card_priority(card):
-        suit, value = card
-        if suit == hukum_suit:
-            return values.index(value)  # Priority based on the value index for Hukum suit
-        elif suit == starting_suit:
-            return values.index(value)  # Priority based on the value index for starting suit
-        
-
-    # Find the winning card based on priority
-    hukum_suit_cards = [card for card in chosen_cards if card[0] == hukum_suit]
-    if hukum_suit_cards:
-        winning_card = max(hukum_suit_cards, key=card_priority)
-    else:
-        starting_suit_cards = [card for card in chosen_cards if card[0] == starting_suit]
-        winning_card = max(starting_suit_cards, key=card_priority, default=None)
-
-    return winning_card
+    # Function to calculate priority based on the specified conditions
+    def calculate_priority(card):
+      suit, value = card
+     
+      if suit.lower() == hukum_suit:
+        return 16 + card_priority[value]  # Priority for Hukum suit
+      elif suit.lower() == starting_suit.lower():
+        return 8 + card_priority[value]  # Priority for starting suit
+      else:
+        return card_priority[value]  # Priority for other suits
 
 
-    # Sort the chosen cards based on priority
-    chosen_cards.sort(key=lambda card: card_priority(card),reverse=True)
+    # Sort the chosen cards based on the calculated priority
+    chosen_cards.sort(key=lambda card: calculate_priority(card), reverse=True)
 
     # Return the winning card (the first card after sorting)
     return chosen_cards[0]
-
 
 # Function for the main game loop
 def play_round(hands, current_round, starting_player, eliminated_cards, hukum_suit):
@@ -91,8 +83,9 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
     winning_card = determine_winning_card(chosen_cards_round, hukum_suit, chosen_cards_round[0][0])
 
     # Find the player who played the winning card
-    value_index = chosen_cards_round.index(winning_card)
-    winner_player = (starting_player + value_index  ) % 4 +1
+    winner_index = chosen_cards_round.index(winning_card)
+
+    winner_player = (starting_player -winner_index) % 4 + 1
 
     print(f"\nPlayer {winner_player} wins Round {current_round} with the card: {winning_card}")
 
@@ -110,7 +103,6 @@ def play_game():
 
     # Determine which team will distribute the cards
     distributing_team = input("Which team will shuffle and distribute the cards? Enter 'A' for Team A or 'B' for Team B: ")
-
     if distributing_team.upper() == 'A':
         distributing_team_name = 'Team A'
         receiving_team_name = 'Team B'
@@ -152,12 +144,12 @@ def play_game():
     # Determine the player who will choose Hukum
     choosing_player = (distributing_player % num_players) + 1
     print(f"\n{receiving_team_name}, player {choosing_player} choose hukum from this suit['Clubs', 'Diamonds', 'Spades', 'Hearts'] ")
-    hukum_suit = input("Enter the chosen Hukum  ")
+    hukum_suit = input("Enter the chosen Hukum  ").lower()
 
     # Check if the entered Hukum is a valid suit
     while hukum_suit.capitalize() not in suits:
         print("Invalid suit. Please choose from 'Clubs', 'Diamonds', 'Spades', 'Hearts'")
-        hukum_suit = input("Enter the chosen Hukum  ")
+        hukum_suit = input("Enter the chosen Hukum  ").lower()
 
     print(f"{receiving_team_name} selects '{hukum_suit.capitalize()}' as Hukum.")
 
@@ -192,8 +184,7 @@ def play_game():
         print("\nHands at the end of the Second half:")
         for i, hand in enumerate(hands_first_half):
             print(f'Player {i + 1} Hand: {hand}')
-
-        # Determine the player who starts the game after the second half based on the shuffling player in the first half
+# Determine the player who starts the game after the second half based on the shuffling player in the first half
         if distributing_team_name == 'Team A' and distributing_player == 1:
             starting_player_second_half = 3  # Player 1 starts if Player 1 shuffled in the first half
         elif distributing_team_name == 'Team A' and distributing_player == 3:
