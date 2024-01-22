@@ -23,8 +23,8 @@ def shuffle_and_distribute(deck, num_players, num_cards):
     return hands, deck[current_card:]
 
 # Function for a player's turn to choose a card
+# Function for a player's turn to choose a card
 def choose_card(player_number, player_hand):
-
     print(f"\nPlayer {player_number}'s Hand: {player_hand}")
     chosen_card_index = int(input(f"Player {player_number}, choose the index of the card to play: "))
 
@@ -59,6 +59,8 @@ def determine_winning_card(chosen_cards, hukum_suit, starting_suit):
     return chosen_cards[0]
 
 # Function for the main game loop
+# Function for the main game loop
+# Function for the main game loop
 def play_round(hands, current_round, starting_player, eliminated_cards, hukum_suit):
     print(f"\nRound {current_round} - Card choosing and showing phase:")
     current_player = starting_player
@@ -71,7 +73,7 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
         print(f"Player {current_player} shows: {chosen_card}")
         print(hands[current_player - 1])
 
-        chosen_cards_round.append(chosen_card)
+        chosen_cards_round.append((current_player, chosen_card))  # Store both player number and chosen card
 
         # Move to the next player
         current_player = (current_player % 4) + 1
@@ -80,22 +82,21 @@ def play_round(hands, current_round, starting_player, eliminated_cards, hukum_su
     print(f"\nChosen cards for Round {current_round}: {chosen_cards_round}")
 
     # Determine the winning card based on priority
-    winning_card = determine_winning_card(chosen_cards_round, hukum_suit, chosen_cards_round[0][0])
+    winning_card = determine_winning_card([card[1] for card in chosen_cards_round], hukum_suit, chosen_cards_round[0][1][0])
 
     # Find the player who played the winning card
-    winner_index = chosen_cards_round.index(winning_card)
-
-    winner_player = (starting_player -winner_index) % 4 + 1
+    winner_player = [card[0] for card in chosen_cards_round if card[1] == winning_card][0]
 
     print(f"\nPlayer {winner_player} wins Round {current_round} with the card: {winning_card}")
 
     # Add the winning card to the eliminated cards set
     eliminated_cards[current_round - 1].add(winning_card)
 
-    # Update the starting suit for the next round based on the winner of the current round
-    starting_suit_next_round = chosen_cards_round[0][0]
+    # Update the starting player for the next round based on the winner of the current round
+    starting_player_next_round = (winner_player % 4) + 1
 
-    return starting_suit_next_round
+    return starting_player_next_round -2
+
 
 # Function for the main game loop
 def play_game():
@@ -194,47 +195,27 @@ def play_game():
         else:
             starting_player_second_half = 2  # Default to Player 2 if none of the above conditions are met
 
-         # Determine the rounds needed for each team to win
-    if distributing_team_name == 'Team A':
-        rounds_to_win_team_a = 5
-        rounds_to_win_team_b = 4
-    else:
-        rounds_to_win_team_a = 4
-        rounds_to_win_team_b = 5
+        # Play 8 sets (rounds)
+        for set_num in range(1, 9):
+            eliminated_cards = [set() for _ in range(8)]  # Initialize eliminated cards for each set
 
-    # Initialize points for each team
-    points_team_a = 0
-    points_team_b = 0
+            # Play 8 rounds within the set
+            # Play 8 rounds within the set
+            for round_num in range(1, 9):
+    # Pass the starting player for the current round
+                starting_player_second_half = play_round(hands_first_half, round_num, starting_player_second_half, eliminated_cards, hukum_suit)
+    
+    # Determine the winning player of the last round in the set
+                winning_player_last_round = (starting_player_second_half % 4) + 1
+    
+    # Update starting player for the next round based on the winner of the current round
+                starting_player_second_half = winning_player_last_round
 
-    for set_num in range(1, 9):
-        eliminated_cards = [set() for _ in range(8)]  # Initialize eliminated cards for each set
+            print(f"\nSet {set_num} completed. Eliminated cards in each round:")
+            for i, eliminated_set in enumerate(eliminated_cards):
+                print(f"Round {i + 1}: {eliminated_set}")
 
-        # Play 8 rounds within the set
-        for round_num in range(1, 9):
-            starting_suit_second_half = play_round(hands_first_half, round_num, starting_player_second_half, eliminated_cards, hukum_suit)
-
-            # Update points based on the winning team of the round
-            winning_player_last_round = (starting_player_second_half % 4) + 1
-            if winning_player_last_round in [1, 3]:
-                points_team_a += 1
-            else:
-                points_team_b += 1
-
-            print(f"\nPoints after Round {round_num}: Team A - {points_team_a}, Team B - {points_team_b}")
-
-            # Check for the winning team after each round
-            if points_team_a >= rounds_to_win_team_a:
-                print(f"\nTeam A wins the game!")
-                return
-            elif points_team_b >= rounds_to_win_team_b:
-                print(f"\nTeam B wins the game!")
-                return
-
-        print(f"\nSet {set_num} completed. Eliminated cards in each round:")
-        for i, eliminated_set in enumerate(eliminated_cards):
-            print(f"Round {i + 1}: {eliminated_set}")
-
-    print("\nAll sets have been completed. All players have shown their cards.")
+        print("\nAll sets have been completed. All players have shown their cards.")
 
 # Start the game
 play_game()
