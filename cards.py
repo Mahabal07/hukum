@@ -196,11 +196,11 @@ def play_game():
             starting_player_second_half = 2  # Default to Player 2 if none of the above conditions are met
 # Determine the rounds needed for each team to win
     if distributing_team_name == 'Team A':
-        rounds_to_win_team_a = 5
-        rounds_to_win_team_b = 4
-    else:
         rounds_to_win_team_a = 4
         rounds_to_win_team_b = 5
+    else:
+        rounds_to_win_team_a = 5
+        rounds_to_win_team_b = 4
 
     # Initialize points for each team
     points_team_a = 0
