@@ -14,7 +14,7 @@ function createDeck() {
     let deck = [];
     suits.forEach(suit => {
         values.forEach(value => {
-            let cardImage = `/cards/${suit.toLowerCase()}/${value}.webp`;
+            let cardImage = `cards/${suit.toLowerCase()}/${value}.webp`;
             deck.push({ suit, value, image: cardImage });
         });
     });
