@@ -6,42 +6,39 @@
     <title>Hukum Card Game</title>
     <script src="script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-yellow-500 {
+            background-color: rgba(253, 224, 71, 0.5) !important;
+        }
+        .scale-125 {
+            transform: scale(1.25);
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-600 min-h-screen flex items-center justify-center">
     <div class="container mx-auto p-8">
         <h1 class="text-4xl text-white font-bold text-center mb-10">Hukum Card Game</h1>
-
-        <!-- Scoreboard -->
-        <div class="flex justify-between mb-4">
-            <div id="team-a-score" class="text-white text-xl">Team A: 0</div>
-            <div id="team-b-score" class="text-white text-xl">Team B: 0</div>
-        </div>
-
-        <!-- Game Board -->
-        <div id="game-board" class="grid grid-cols-2 gap-4 mb-10">
+        <div id="game-board" class="grid grid-cols-4 gap-4 mb-10">
             <!-- Player hands will be dynamically injected here -->
         </div>
 
-        <!-- Middle table to show cards on the table -->
-        <div id="middle-table" class="flex items-center justify-center mb-10"></div>
-
-        <!-- Shuffle Button -->
-        <div class="flex items-center justify-center">
-            <button id="shuffle-btn" class="px-6 py-3 bg-green-500 text-white font-semibold rounded hover:bg-green-700 transition-all">
-                Shuffle and Deal
-            </button>
+        <div id="middle-table" class="flex justify-center mb-4">
+            <!-- Cards played on the table will be displayed here -->
         </div>
 
-        <!-- Hukum Selection -->
-        <div id="hukum-selection" class="hidden flex items-center justify-center mt-4">
-            <button class="hukum-btn px-4 py-2 bg-blue-500 text-white rounded mx-2">Clubs</button>
-            <button class="hukum-btn px-4 py-2 bg-blue-500 text-white rounded mx-2">Diamonds</button>
-            <button class="hukum-btn px-4 py-2 bg-blue-500 text-white rounded mx-2">Spades</button>
-            <button class="hukum-btn px-4 py-2 bg-blue-500 text-white rounded mx-2">Hearts</button>
+        <div id="hukum-selection" class="hidden mb-4">
+            <h2 class="text-xl text-white text-center mb-4">Choose your Hukum:</h2>
+            <!-- Hukum buttons will be injected here -->
         </div>
 
-        <div class="mt-8">
-            <h2 class="text-xl text-white text-center" id="round-info">Round 1: Waiting for player actions...</h2>
+        <div class="flex items-center justify-center mb-4">
+            <h2 class="text-xl text-white" id="round-info">Shuffle and deal to start!</h2>
+        </div>
+
+        <div class="flex justify-between mt-4">
+            <h3 class="text-white" id="team-a-score">Team A: 0</h3>
+            <h3 class="text-white" id="team-b-score">Team B: 0</h3>
         </div>
     </div>
 </body>

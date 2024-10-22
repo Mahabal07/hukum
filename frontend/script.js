@@ -8,6 +8,8 @@ let deck = [];
 let cardsOnTable = []; // To track cards played on the table
 let teamAScore = 0;
 let teamBScore = 0;
+let startingSuit = ''; // Suit of the first played card in each round
+let hukumSelected = false;
 
 // Function to create deck with images
 function createDeck() {
@@ -21,54 +23,67 @@ function createDeck() {
     return deck;
 }
 
-// Function to shuffle and deal cards
+// Function to shuffle and deal cards (first 4 cards each)
 function shuffleAndDeal() {
     deck = createDeck();
     deck.sort(() => Math.random() - 0.5); // Shuffle
 
-    // Deal 8 cards to each player
+    // Deal 4 cards to each player initially
     hands.forEach((hand, index) => {
-        hands[index] = deck.splice(0, 8);
+        hands[index] = deck.splice(0, 4); // Deal 4 cards to each player
     });
+
     updateGameBoard();
     document.getElementById('round-info').textContent = `Round ${currentRound}: Select your Hukum!`;
     showHukumSelection();
 }
 
-// Function to start the game after selecting Hukum
-function startGame() {
-    // Remove shuffle button
-    document.getElementById('shuffle-btn').classList.add('hidden');
+// Function to distribute remaining 4 cards after Hukum is chosen
+function distributeRemainingCards() {
+    hands.forEach((hand, index) => {
+        hands[index] = hands[index].concat(deck.splice(0, 4)); // Deal the remaining 4 cards to each player
+    });
+    updateGameBoard();
     document.getElementById('round-info').textContent = `Round ${currentRound}: Player 1, it's your turn!`;
     highlightCurrentPlayer();
 }
 
+// Function to start the game after selecting Hukum
+function startGame() {
+    hukumSelected = true;
+    document.getElementById('hukum-selection').classList.add('hidden');
+    distributeRemainingCards(); // Distribute remaining 4 cards after Hukum
+}
+
 // Function to highlight the current player
 function highlightCurrentPlayer() {
-    // Remove highlight from all players
     document.querySelectorAll('.player-hand').forEach(hand => {
         hand.classList.remove('bg-yellow-500');
     });
-
-    // Highlight the current player
-    const currentPlayerHand = document.querySelector(`#player-${currentPlayer + 1} .player-hand`);
-    currentPlayerHand.classList.add('bg-yellow-500');
+    document.querySelector(`#player-${currentPlayer + 1}`).classList.add('bg-yellow-500');
 }
 
 // Function to show Hukum selection
 function showHukumSelection() {
-    document.getElementById('hukum-selection').classList.remove('hidden');
-    document.querySelectorAll('.hukum-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            hukumSuit = e.target.textContent;
+    const hukumSelectionDiv = document.getElementById('hukum-selection');
+    hukumSelectionDiv.classList.remove('hidden');
+
+    suits.forEach(suit => {
+        const suitButton = document.createElement('button');
+        suitButton.textContent = suit;
+        suitButton.className = 'hukum-btn px-4 py-2 bg-blue-500 text-white rounded m-2';
+        suitButton.addEventListener('click', () => {
+            hukumSuit = suit.toLowerCase(); // Store Hukum suit in lowercase
             document.getElementById('round-info').textContent = `Hukum selected: ${hukumSuit}. Game starts!`;
-            document.getElementById('hukum-selection').classList.add('hidden');
             startGame(); // Start the game after Hukum is selected
         });
+        hukumSelectionDiv.appendChild(suitButton);
     });
 }
 
-// Function to render player hands
+// Function to render player hands and handle card highlighting based on starting suit
+// Function to render player hands and handle card highlighting based on starting suit
+// Function to render player hands and handle card highlighting based on starting suit
 function updateGameBoard() {
     const gameBoard = document.getElementById('game-board');
     gameBoard.innerHTML = ''; // Clear the board
@@ -90,11 +105,33 @@ function updateGameBoard() {
             cardImg.src = card.image;
             cardImg.alt = `${card.value} of ${card.suit}`;
             cardImg.className = 'w-24 h-32 transition-transform transform hover:scale-105';
+
+            // Apply glow/dim logic only for players 2, 3, and 4 (currentPlayer !== 0)
+            if (playerIndex === currentPlayer && hukumSelected) {
+                if (startingSuit) {
+                    if (card.suit.toLowerCase() === startingSuit.toLowerCase()) {
+                        cardImg.classList.add('glow-card');  // Highlight cards that match the starting suit
+                        cardImg.classList.remove('dim-card'); // Ensure non-dimmed
+                    } else {
+                        cardImg.classList.add('dim-card');   // Dim cards not matching the starting suit
+                        cardImg.classList.remove('glow-card'); // Ensure non-highlighted
+                    }
+                }
+            } else {
+                // Ensure no glow/dim effects when it's not the player's turn
+                cardImg.classList.remove('glow-card', 'dim-card');
+            }
+
+            // Allow card selection only for the current player
             cardImg.addEventListener('click', () => {
-                if (playerIndex === currentPlayer) {
-                    playerPlaysCard(cardIndex); // Only allow current player to play a card
+                if (playerIndex === currentPlayer && hukumSelected) {
+                    if (canPlayCard(card)) {
+                        playerPlaysCard(cardIndex);
+                        resetGlowAndDimEffects(); // Reset the glow and dim effects after card is played
+                    }
                 }
             });
+
             handDiv.appendChild(cardImg);
         });
 
@@ -104,17 +141,48 @@ function updateGameBoard() {
     });
 }
 
+// Function to reset glow and dim effects for all players' hands after a card is played
+function resetGlowAndDimEffects() {
+    document.querySelectorAll('.glow-card').forEach(card => {
+        card.classList.remove('glow-card');
+    });
+    document.querySelectorAll('.dim-card').forEach(card => {
+        card.classList.remove('dim-card');
+    });
+}
+
+
+
+// Function to check if a card can be played
+function canPlayCard(card) {
+    if (cardsOnTable.length === 0) {
+        // First card of the round can be any card
+        return true;
+    } else {
+        // If the player has a card matching the starting suit, they must play it
+        const playerHasStartingSuit = hands[currentPlayer].some(c => c.suit.toLowerCase() === startingSuit.toLowerCase());
+        if (playerHasStartingSuit) {
+            return card.suit.toLowerCase() === startingSuit.toLowerCase();
+        } else {
+            // If no matching suit, the player can play any card
+            return true;
+        }
+    }
+}
+
 // Function to handle card selection and move it to the middle
 function playerPlaysCard(cardIndex) {
     const playedCard = hands[currentPlayer][cardIndex];
     hands[currentPlayer].splice(cardIndex, 1); // Remove card from hand
     cardsOnTable.push({ player: currentPlayer, card: playedCard });
 
-    // Update game board and animate card to the middle
+    if (cardsOnTable.length === 1) {
+        startingSuit = playedCard.suit.toLowerCase(); // Set starting suit for the round
+    }
+
     updateGameBoard();
     moveCardToTable(playedCard);
 
-    // Check if the round is complete (all 4 players have played)
     if (cardsOnTable.length === 4) {
         setTimeout(() => {
             declareRoundWinner(); // Declare the winner of the round
@@ -122,42 +190,30 @@ function playerPlaysCard(cardIndex) {
         }, 1000); // Add a short delay before declaring winner
     } else {
         // Move to next player
-        currentPlayer = (currentPlayer + 1) % 4; // Cycle between players 0-3
-        document.getElementById('round-info').textContent = `Player ${currentPlayer + 1}'s turn!`;
-        highlightCurrentPlayer();
+        currentPlayer = (currentPlayer + 1) % 4;
+        highlightCurrentPlayer(); // Highlight the next player
     }
 }
 
-// Function to move a card to the table (animate card to center)
+// Function to move card to the middle table
 function moveCardToTable(card) {
     const middleTable = document.getElementById('middle-table');
     const cardImg = document.createElement('img');
     cardImg.src = card.image;
     cardImg.alt = `${card.value} of ${card.suit}`;
-    cardImg.className = 'w-24 h-32 transition-transform transform scale-0';
-
-    // Append card to the table and animate it
+    cardImg.className = 'w-32 h-48 transition-transform transform';
     middleTable.appendChild(cardImg);
+
+    // Animate card to table (basic animation)
     setTimeout(() => {
-        cardImg.classList.remove('scale-0');
-        cardImg.classList.add('scale-100');
-    }, 100); // Add a delay for the animation
+        cardImg.classList.add('scale-125'); // Scale up the card
+        cardImg.classList.remove('scale-125'); // Scale it back
+    }, 500);
 }
 
-// Function to declare the winner of the round
+// Function to declare round winner using the provided determine_winning_card logic
 function declareRoundWinner() {
-    // Compare the cards on the table and determine the round winner
-    let winningPlayer = cardsOnTable[0].player; // Assume first player's card is the highest
-    let highestCard = cardsOnTable[0].card;
-
-    cardsOnTable.forEach(({ player, card }) => {
-        if (compareCards(card, highestCard)) {
-            highestCard = card;
-            winningPlayer = player;
-        }
-    });
-
-    // Determine which team won the round (Team A: Player 1 and Player 3, Team B: Player 2 and Player 4)
+    const winningPlayer = determineRoundWinner();
     const winningTeam = winningPlayer % 2 === 0 ? 'A' : 'B';
     if (winningTeam === 'A') {
         teamAScore++;
@@ -165,71 +221,69 @@ function declareRoundWinner() {
         teamBScore++;
     }
 
+    // Small win animation for the round
+    const roundInfo = document.getElementById('round-info');
+    roundInfo.textContent = `Team ${winningTeam} wins this round!`;
+    roundInfo.classList.add('animate-bounce');
+    setTimeout(() => {
+        roundInfo.classList.remove('animate-bounce');
+    }, 1000);
+
     // Update scores and check if there's a game winner
     updateScores();
     checkForGameWinner();
 }
 
-// Function to compare two cards (you can add your game-specific logic here)
-function compareCards(card1, card2) {
-    // Add custom logic for comparing cards (e.g., based on value or suit)
-    const cardValueOrder = values;
-    const value1 = cardValueOrder.indexOf(card1.value);
-    const value2 = cardValueOrder.indexOf(card2.value);
+// Logic to determine the winning card based on Hukum and starting suits
+function determineRoundWinner() {
+    const cardPriority = {'7': 0, '8': 1, '9': 2, '10': 3, 'Jack': 4, 'Queen': 5, 'King': 6, 'Ace': 7};
 
-    return value1 > value2; // Return true if card1 is higher
+    // Function to calculate priority
+    function calculatePriority(card) {
+        if (card.suit.toLowerCase() === hukumSuit) {
+            return 16 + cardPriority[card.value]; // Priority for Hukum suit
+        } else if (card.suit.toLowerCase() === startingSuit.toLowerCase()) {
+            return 8 + cardPriority[card.value]; // Priority for starting suit
+        } else {
+            return cardPriority[card.value]; // Priority for other suits
+        }
+    }
+
+    // Sort cards on the table based on priority and return the highest priority card's player
+    cardsOnTable.sort((a, b) => calculatePriority(b.card) - calculatePriority(a.card));
+    return cardsOnTable[0].player;
 }
 
-// Function to update scores
+// Function to clear the table after each round
+function clearTable() {
+    document.getElementById('middle-table').innerHTML = ''; // Clear the cards on the table
+    cardsOnTable = [];
+    currentPlayer = 0; // Player 1 starts the next round
+    highlightCurrentPlayer();
+}
+
+// Function to update team scores
 function updateScores() {
     document.getElementById('team-a-score').textContent = `Team A: ${teamAScore}`;
     document.getElementById('team-b-score').textContent = `Team B: ${teamBScore}`;
 }
 
-// Function to clear the table
-function clearTable() {
-    const middleTable = document.getElementById('middle-table');
-    middleTable.innerHTML = ''; // Clear the middle table
-    cardsOnTable = []; // Reset cards on the table
-    currentPlayer = 0; // Reset to Player 1
-}
-
-// Function to check for the game winner
+// Function to check if a team has won the game
 function checkForGameWinner() {
     if (teamAScore === 5 || teamBScore === 5) {
         const winningTeam = teamAScore === 5 ? 'A' : 'B';
-        document.getElementById('round-info').textContent = `Team ${winningTeam} wins the game!`;
 
-        // Show restart button
-        const restartButton = document.createElement('button');
-        restartButton.textContent = 'Restart Game';
-        restartButton.className = 'px-6 py-3 bg-red-500 text-white font-semibold rounded hover:bg-red-700 transition-all mt-4';
-        restartButton.addEventListener('click', restartGame);
-        document.querySelector('.container').appendChild(restartButton);
-    } else {
-        currentRound++;
-        shuffleAndDeal(); // Shuffle and deal new cards for the next round
+        // Show a big win animation for the game
+        document.getElementById('round-info').textContent = `Team ${winningTeam} wins the game!`;
+        document.getElementById('round-info').classList.add('animate-ping');
+
+        // Restart the game after a few seconds or provide a button
+        setTimeout(() => {
+            location.reload(); // Restart the game by refreshing the page
+        }, 3000); // Delay before restarting
     }
 }
 
-// Function to restart the game
-function restartGame() {
-    currentRound = 1;
-    teamAScore = 0;
-    teamBScore = 0;
-
-    // Reset UI
-    document.getElementById('shuffle-btn').classList.remove('hidden');
-    document.getElementById('round-info').textContent = 'Shuffle and deal to start!';
-    updateScores();
-    clearTable();
-
-    // Remove restart button
-    const restartButton = document.querySelector('.container button');
-    if (restartButton) restartButton.remove();
-}
-
 // Game Initialization
-document.getElementById('shuffle-btn').addEventListener('click', () => {
-    shuffleAndDeal();
-});
+shuffleAndDeal(); // Start by shuffling and dealing cards             ```update the code to achieve  updated version that includes:
+
