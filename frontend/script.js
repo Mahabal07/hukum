@@ -23,26 +23,54 @@ function createDeck() {
 }
 
 function shuffleAndDeal() {
+    // Create and shuffle the full deck
     deck = createDeck();
     deck.sort(() => Math.random() - 0.5);
 
+    // Deal initial 4 cards to each player
+    hands = [[], [], [], []];
     hands.forEach((hand, index) => {
-        hands[index] = deck.splice(0, 4);
+        for (let i = 0; i < 4; i++) {
+            const card = deck.pop();
+            hand.push(card);
+        }
     });
 
     updateGameBoard();
-    document.getElementById('round-info').textContent = `Round ${currentRound}: Select your Hukum!`;
     showHukumSelection();
 }
 
 function distributeRemainingCards() {
-    hands.forEach((hand, index) => {
-        hands[index] = hands[index].concat(deck.splice(0, 4));
+    // Distribute remaining 4 cards to each player with animation
+    hands.forEach((hand, playerIndex) => {
+        for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+                const card = deck.pop();
+                hand.push(card);
+                updateGameBoard();
+                
+                // Add animation to the newly added card
+                const playerHand = document.querySelector(`#player-${playerIndex + 1}`);
+                const lastCard = playerHand.querySelector('.grid-cols-4 img:last-child');
+                if (lastCard) {
+                    lastCard.classList.add('card-distribution-animation');
+                }
+            }, (playerIndex * 4 + i) * 200); // Stagger the distribution
+        }
     });
-    updateGameBoard();
-    document.getElementById('round-info').textContent = `Round ${currentRound}: Player ${currentPlayer + 1}, it's your turn!`;
-    highlightCurrentPlayer();
+
+    // Start the game after all cards are distributed
+    setTimeout(() => {
+        hukumSelected = true;
+        document.getElementById('round-info').textContent = `Round ${currentRound}: Player ${currentPlayer + 1}, it's your turn!`;
+        highlightCurrentPlayer();
+    }, 3500); // Wait for all cards to be distributed
 }
+
+// Modify the game container style for better visibility
+document.querySelector('.game-container').style.transform = 'scale(0.85)';
+document.querySelector('.game-container').style.transformOrigin = 'top center';
+
 
 function startGame() {
     hukumSelected = true;
@@ -50,29 +78,92 @@ function startGame() {
     distributeRemainingCards();
 }
 
+/* Update the JavaScript highlightCurrentPlayer function with this new version */
 function highlightCurrentPlayer() {
-    document.querySelectorAll('.player-hand').forEach(hand => {
-        hand.classList.remove('bg-yellow-500');
+    document.querySelectorAll('.player-hand').forEach((hand, index) => {
+        if (index === currentPlayer) {
+            hand.classList.remove('bg-yellow-500');  // Remove old class
+            hand.classList.add('active-player');     // Add new class
+            hand.classList.add('animate__animated', 'animate__pulse');
+        } else {
+            hand.classList.remove('active-player', 'animate__animated', 'animate__pulse');
+        }
     });
-    document.querySelector(`#player-${currentPlayer + 1}`).classList.add('bg-yellow-500');
-}
+  }
+  
 
 function showHukumSelection() {
-    const hukumSelectionDiv = document.getElementById('hukum-selection');
-    hukumSelectionDiv.innerHTML = ''; // Clear previous buttons
-    hukumSelectionDiv.classList.remove('hidden');
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop animate__animated animate__fadeIn';
+    
+    const suitIcons = {
+        'Hearts': '♥',
+        'Diamonds': '♦',
+        'Clubs': '♣',
+        'Spades': '♠'
+    };
 
-    suits.forEach(suit => {
-        const suitButton = document.createElement('button');
-        suitButton.textContent = suit;
-        suitButton.className = 'hukum-btn px-4 py-2 bg-blue-500 text-white rounded m-2';
-        suitButton.addEventListener('click', () => {
-            hukumSuit = suit.toLowerCase();
-            document.getElementById('round-info').textContent = `Hukum selected: ${suit}. Game starts!`;
-            startGame();
-        });
-        hukumSelectionDiv.appendChild(suitButton);
-    });
+    modal.innerHTML = `
+        <div class="modal-content animate__animated animate__zoomIn">
+            <h2 class="text-2xl font-bold mb-4">Select Hukum Suit</h2>
+            <div class="hukum-grid">
+                ${suits.map(suit => `
+                    <button class="suit-button" onclick="selectHukum('${suit}')">
+                        <span class="suit-icon ${suit.toLowerCase()}">${suitIcons[suit]}</span>
+                        <span>${suit}</span>
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+
+function selectHukum(suit) {
+    hukumSuit = suit.toLowerCase();
+    
+    // Create or update hukum indicator
+    let indicator = document.getElementById('hukum-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'hukum-indicator';
+        indicator.className = 'hukum-indicator animate__animated animate__fadeInRight';
+    }
+    
+    const suitIcon = {
+        'hearts': '♥',
+        'diamonds': '♦',
+        'clubs': '♣',
+        'spades': '♠'
+    }[suit.toLowerCase()];
+    
+    indicator.innerHTML = `
+        <span>Hukum:</span>
+        <span class="suit-icon ${suit.toLowerCase()}">${suitIcon}</span>
+    `;
+    
+    document.body.appendChild(indicator);
+    
+    // Remove modal with animation
+    const modal = document.querySelector('.modal-backdrop');
+    modal.classList.remove('animate__fadeIn');
+    modal.classList.add('animate__fadeOut');
+    setTimeout(() => {
+        modal.remove();
+        distributeRemainingCards();
+    }, 500);
+}
+
+// Modify the game container style
+document.querySelector('.game-container').style.transform = 'scale(0.85)';
+document.querySelector('.game-container').style.transformOrigin = 'top center';
+
+// Remove the existing hukum selection div as we're using the modal now
+const oldHukumSelection = document.getElementById('hukum-selection');
+if (oldHukumSelection) {
+    oldHukumSelection.remove();
 }
 
 function updateGameBoard() {
@@ -189,37 +280,45 @@ function moveCardToTable(card) {
     const cardImg = document.createElement('img');
     cardImg.src = card.image;
     cardImg.alt = `${card.value} of ${card.suit}`;
-    cardImg.className = 'w-32 h-48 transition-transform transform';
+    cardImg.className = 'w-32 h-48 transition-transform transform card-played';
+    
+    // Add floating animation
+    cardImg.style.animation = `
+        playCard 0.5s ease-out,
+        float 3s ease-in-out infinite
+    `;
+    
     middleTable.appendChild(cardImg);
-
-    setTimeout(() => {
-        cardImg.classList.add('scale-125');
-        setTimeout(() => {
-            cardImg.classList.remove('scale-125');
-        }, 200);
-    }, 100);
 }
 
 function declareRoundWinner() {
     const winningIndex = determineRoundWinner();
     const winningTeam = winningIndex % 2 === 0 ? 'A' : 'B';
+    
     if (winningTeam === 'A') {
         teamAScore++;
+        document.getElementById('team-a-score').classList.add('animate__animated', 'animate__pulse');
     } else {
         teamBScore++;
+        document.getElementById('team-b-score').classList.add('animate__animated', 'animate__pulse');
     }
 
     const roundInfo = document.getElementById('round-info');
     roundInfo.textContent = `Player ${winningIndex + 1} (Team ${winningTeam}) wins this round!`;
-    roundInfo.classList.add('animate-bounce');
+    roundInfo.classList.add('animate__animated', 'animate__bounceIn');
+    
+    // Remove animation classes after they complete
     setTimeout(() => {
-        roundInfo.classList.remove('animate-bounce');
+        document.querySelectorAll('.animate__animated').forEach(el => {
+            el.classList.remove('animate__animated', 'animate__pulse', 'animate__bounceIn');
+        });
     }, 1000);
 
     updateScores();
     checkForGameWinner();
-    return winningIndex; // Return the winning player index
+    return winningIndex;
 }
+
 
 function determineRoundWinner() {
     const cardPriority = {'7': 0, '8': 1, '9': 2, '10': 3, 'Jack': 4, 'Queen': 5, 'King': 6, 'Ace': 7};
@@ -259,6 +358,43 @@ function checkForGameWinner() {
         }, 3000);
     }
 }
+function announceWinner(team) {
+    const gameContainer = document.querySelector('.game-container');
+    const announcement = document.createElement('div');
+    announcement.className = 'winner-announcement animate__animated animate__bounceIn';
+    announcement.innerHTML = `
+        <div class="winner-content">
+            <h2>Team ${team} Wins!</h2>
+            <div class="fireworks"></div>
+        </div>
+    `;
+    
+    gameContainer.appendChild(announcement);
+    
+    // Add confetti effect
+    createConfetti();
+    
+    setTimeout(() => {
+        announcement.classList.add('animate__bounceOut');
+        setTimeout(() => {
+            announcement.remove();
+        }, 1000);
+    }, 3000);
+}
+
+function createConfetti() {
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3000);
+    }
+}
+
 
 // Game Initialization
 shuffleAndDeal();
