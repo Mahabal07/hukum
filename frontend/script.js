@@ -234,44 +234,57 @@ function updateGameBoard() {
     highlightCurrentPlayer();
 }
 
-function canPlayCard(card) {
-    if (cardsOnTable.length === 0) {
+function canPlayCard(card, gameData) {
+    if (gameData.cardsOnTable.length === 0) {
         return true;
     }
     
-    const playerHasStartingSuit = hands[currentPlayer].some(c => 
-        c.suit.toLowerCase() === startingSuit.toLowerCase()
-    );
+    const startingSuit = gameData.startingSuit.toLowerCase();
+    const playerHand = gameData.hands[playerPosition];
+    const hasStartingSuit = playerHand.some(c => c.suit.toLowerCase() === startingSuit);
     
-    if (playerHasStartingSuit) {
-        return card.suit.toLowerCase() === startingSuit.toLowerCase();
+    if (hasStartingSuit) {
+        return card.suit.toLowerCase() === startingSuit;
     }
+    
     return true;
 }
 
-function playerPlaysCard(cardIndex) {
-    const playedCard = hands[currentPlayer][cardIndex];
-    hands[currentPlayer].splice(cardIndex, 1);
-    cardsOnTable.push({ player: currentPlayer, card: playedCard });
+async function playerPlaysCard(cardIndex) {
+    try {
+        const gameRef = ref(db, `rooms/${roomId}`);
+        const snapshot = await get(gameRef);
+        const gameData = snapshot.val();
 
-    if (cardsOnTable.length === 1) {
-        startingSuit = playedCard.suit.toLowerCase();
-    }
+        if (!gameData) {
+            console.error("Game data not found");
+            return;
+        }
 
-    // Move to next player before updating the game board
-    currentPlayer = (currentPlayer + 1) % 4;
-    
-    moveCardToTable(playedCard);
-    updateGameBoard(); // This will now show highlighting for the next player
+        // Create a copy of the game data to work with
+        const updatedGameData = { ...gameData };
+        
+        // Update the necessary fields
+        const playedCard = updatedGameData.hands[playerPosition][cardIndex];
+        updatedGameData.hands[playerPosition] = [
+            ...updatedGameData.hands[playerPosition].slice(0, cardIndex),
+            ...updatedGameData.hands[playerPosition].slice(cardIndex + 1)
+        ];
+        updatedGameData.cardsOnTable = [...(updatedGameData.cardsOnTable || []), { player: playerPosition, card: playedCard }];
 
-    if (cardsOnTable.length === 4) {
-        setTimeout(() => {
-            const winningPlayer = declareRoundWinner();
-            clearTable();
-            currentPlayer = winningPlayer; // Set the next starting player to the round winner
-            startingSuit = ''; // Reset starting suit for the new round
-            updateGameBoard();
-        }, 1000);
+        if (updatedGameData.cardsOnTable.length === 1) {
+            updatedGameData.startingSuit = playedCard.suit.toLowerCase();
+        }
+
+        updatedGameData.currentPlayer = (updatedGameData.currentPlayer + 1) % 4;
+
+        // Use the safe update function
+        const updateSuccess = await updateGameDataInFirebase(updatedGameData);
+        if (!updateSuccess) {
+            console.error("Failed to update game data");
+        }
+    } catch (error) {
+        console.error("Error in playerPlaysCard:", error);
     }
 }
 

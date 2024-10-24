@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hukum Card Game - Lobby</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-purple-900 to-blue-900 min-h-screen text-white font-poppins">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12 animate__animated animate__fadeInDown">
+            <h1 class="text-4xl font-bold mb-4">Hukum Card Game</h1>
+            <p class="text-lg text-gray-300">Join a room or create your own</p>
+        </header>
+
+        <!-- User Profile Section -->
+        <div class="mb-8 text-right animate__animated animate__fadeInRight">
+            <span id="userDisplay" class="mr-4"></span>
+            <button id="signOutBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
+                Sign Out
+            </button>
+        </div>
+
+        <!-- Create Room Button -->
+        <div class="flex justify-end mb-8 animate__animated animate__fadeInRight">
+            <button id="createRoomBtn" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg flex items-center space-x-2 transition-all transform hover:scale-105">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Create Room</span>
+            </button>
+        </div>
+
+        <!-- Rooms Grid -->
+        <div id="roomsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate__animated animate__fadeInUp">
+            <!-- Rooms will be dynamically added here -->
+        </div>
+
+        <!-- Create Room Modal -->
+        <div id="createRoomModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+            <div class="bg-white text-gray-800 p-8 rounded-lg w-96 animate__animated animate__zoomIn">
+                <h2 class="text-2xl font-bold mb-4">Create New Room</h2>
+                <input type="text" id="roomNameInput" placeholder="Enter room name" 
+                       class="w-full px-4 py-2 border rounded mb-4">
+                <div class="flex justify-end space-x-4">
+                    <button id="cancelCreateRoom" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button id="confirmCreateRoom" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="lobby.js"></script>
+</body>
+</html>
