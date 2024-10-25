@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hukum Card Game Pro</title>
+    <script src="script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="game-background min-h-screen flex items-center justify-center font-poppins">
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">Hukum Card Game</h1>
+            <div class="score-container">
+                <div id="team-a-score" class="score-card">Team A: 0</div>
+                <div id="team-b-score" class="score-card">Team B: 0</div>
+            </div>
+        </div>
+
+        <div id="game-board" class="game-board">
+            <!-- Player hands will be dynamically injected here -->
+        </div>
+
+        <div id="middle-table" class="middle-table">
+            <!-- Cards played on the table will be displayed here -->
+        </div>
+
+        <div id="hukum-selection" class="hukum-selection hidden">
+            <h2 class="hukum-title">Choose your Hukum:</h2>
+            <div class="hukum-buttons">
+                <!-- Hukum buttons will be injected here -->
+            </div>
+        </div>
+
+        <div class="game-info">
+            <h2 id="round-info" class="round-info">Shuffle and deal to start!</h2>
+        </div>
+    </div>
+</body>
+</html>

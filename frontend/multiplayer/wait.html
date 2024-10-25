@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hukum Card Game - Waiting Room</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-purple-900 to-blue-900 min-h-screen text-white font-poppins">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12 animate__animated animate__fadeInDown">
+            <h1 class="text-4xl font-bold mb-4">Waiting Room</h1>
+            <p id="roomName" class="text-xl text-gray-300">Loading...</p>
+        </header>
+
+        <!-- Players Grid -->
+        <div class="max-w-3xl mx-auto mb-12">
+            <div id="playersGrid" class="grid grid-cols-2 gap-6 animate__animated animate__fadeInUp">
+                <!-- Player slots will be added here -->
+            </div>
+        </div>
+
+        <!-- Ready Button -->
+        <div class="text-center animate__animated animate__fadeInUp">
+            <button id="readyBtn" class="bg-green-600 hover:bg-green-700 px-8 py-3 rounded-lg text-lg font-semibold 
+                                      transition-all transform hover:scale-105">
+                Ready
+            </button>
+            <button id="leaveBtn" class="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg text-lg font-semibold ml-4
+                                       transition-all transform hover:scale-105">
+                Leave Room
+            </button>
+        </div>
+
+        <!-- Game Starting Countdown -->
+        <div id="countdownDisplay" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center">
+            <div class="text-center animate__animated animate__zoomIn">
+                <h2 class="text-4xl font-bold mb-4">Game Starting in</h2>
+                <div id="countdown" class="text-6xl font-bold text-green-500">3</div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="wait.js"></script>
+</body>
+</html>
